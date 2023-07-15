@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Tip Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #43CBFF 10%, #9708CC 100%);
+    }
+
+    .container {
+      width: 90%;
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #cccccc;
+    }
+
+    input[type="number"],
+    button {
+      padding: 10px;
+      width: 100%;
+      margin-bottom: 15px;
+      border-radius: 3px;
+      border: none;
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #333;
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    button {
+      background: linear-gradient(135deg, #43CBFF 10%, #9708CC 100%);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    #tipAmount,
+    #totalAmount,
+    #amountPerPerson {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #cccccc;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .error {
+      color: #ff0000;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .splitContainer {
+      margin-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.5);
+      padding-top: 10px;
+    }
+
+    .splitLabel {
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .splitInput {
+      width: 50px;
+      border: none;
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #333;
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .inputError {
+      border: 1px solid #ff0000;
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+
+    .errorMessage {
+      color: #ff0000;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+  </style>
+  <style>
+    @media (max-width: 600px) {
+      .container {
+        width: 100%;
+        margin: 10px;
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      input[type="number"],
+      button {
+        padding: 8px;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .splitInput {
+        width: 40px;
+      }
+
+      .errorMessage {
+        font-size: 10px;
+        margin-top: 3px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Tip Calculator</h1>
+    <label for="billAmount">Bill Amount:</label>
+    <input type="number" id="billAmount" placeholder="Enter bill amount" autofocus required>
+
+    <label for="tipPercentage">Tip Percentage:</label>
+    <input type="number" id="tipPercentage" placeholder="Enter tip percentage" required min="0" max="100">
+
+    <label for="discountPercentage">Discount Percentage:</label>
+    <input type="number" id="discountPercentage" placeholder="Enter discount percentage" min="0">
+
+    <label for="splitCount">Split Among:</label>
+    <input type="number" id="splitCount" placeholder="Enter number of people" class="splitInput" required min="1">
+
+    <button onclick="calculateTip()">Calculate Tip</button>
+    <button onclick="resetCalculator()">Reset</button>
+
+    <div id="tipAmount"></div>
+    <div id="totalAmount"></div>
+
+    <div id="billAmountError" class="errorMessage"></div>
+    <div id="tipPercentageError" class="errorMessage"></div>
+    <div id="discountPercentageError" class="errorMessage"></div>
+    <div id="splitCountError" class="errorMessage"></div>
+
+    <div class="splitContainer">
+      <label class="splitLabel">Amount per Person:</label>
+      <div id="amountPerPerson"></div>
+    </div>
+  </div>
+
+  <script>
+    function calculateTip() {
+      var billAmount = parseFloat(document.getElementById("billAmount").value);
+      var tipPercentage = parseFloat(document.getElementById("tipPercentage").value);
+      var discountPercentage = parseFloat(document.getElementById("discountPercentage").value);
+      var splitCount = parseInt(document.getElementById("splitCount").value);
+
+      var billAmountError = document.getElementById("billAmountError");
+      var tipPercentageError = document.getElementById("tipPercentageError");
+      var discountPercentageError = document.getElementById("discountPercentageError");
+      var splitCountError = document.getElementById("splitCountError");
+      var inputElements = document.querySelectorAll("#billAmount, #tipPercentage, #discountPercentage, #splitCount");
+
+      inputElements.forEach(function (input) {
+        input.classList.remove("inputError");
+      });
+
+      billAmountError.textContent = "";
+      tipPercentageError.textContent = "";
+      discountPercentageError.textContent = "";
+      splitCountError.textContent = "";
+
+      if (isNaN(billAmount) || billAmount <= 0) {
+        billAmountError.textContent = "Please enter a valid positive value for the bill amount.";
+        document.getElementById("billAmount").classList.add("inputError");
+        return;
+      }
+
+      if (isNaN(tipPercentage) || tipPercentage <= 0 || tipPercentage > 100) {
+        tipPercentageError.textContent = "Please enter a valid tip percentage between 0 and 100.";
+        document.getElementById("tipPercentage").classList.add("inputError");
+        return;
+      }
+
+      if (isNaN(discountPercentage) || discountPercentage < 0) {
+        discountPercentageError.textContent = "Please enter a valid positive value for the discount percentage.";
+        document.getElementById("discountPercentage").classList.add("inputError");
+        return;
+      }
+
+      if (isNaN(splitCount) || splitCount <= 0) {
+        splitCountError.textContent = "Please enter a valid positive value for the number of people.";
+        document.getElementById("splitCount").classList.add("inputError");
+        return;
+      }
+
+      var discountAmount = (billAmount * discountPercentage) / 100;
+      var discountedBillAmount = billAmount - discountAmount;
+
+      var tipAmount = (discountedBillAmount * tipPercentage) / 100;
+      var totalAmount = discountedBillAmount + tipAmount;
+
+      var amountPerPerson = totalAmount / splitCount;
+
+      document.getElementById("tipAmount").textContent = "Tip Amount: $" + tipAmount.toFixed(2);
+      document.getElementById("totalAmount").textContent = "Total Amount: $" + totalAmount.toFixed(2);
+      document.getElementById("amountPerPerson").textContent = "Amount per Person: $" + amountPerPerson.toFixed(2);
+    }
+
+    function resetCalculator() {
+      var inputElements = document.querySelectorAll("#billAmount, #tipPercentage, #discountPercentage, #splitCount");
+      var errorMessages = document.querySelectorAll(".errorMessage");
+
+      inputElements.forEach(function (input) {
+        input.classList.remove("inputError");
+        input.value = "";
+      });
+
+      errorMessages.forEach(function (errorMessage) {
+        errorMessage.textContent = "";
+      });
+
+      document.getElementById("tipAmount").textContent = "";
+      document.getElementById("totalAmount").textContent = "";
+      document.getElementById("amountPerPerson").textContent = "";
+    }
+  </script>
+</body>
+
+</html>
